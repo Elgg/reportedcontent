@@ -1,36 +1,32 @@
 <?php
-/**
- * Elgg index page for web-based applications
- *
- * @package Elgg
- * @subpackage Core
- * @author Curverider Ltd
- * @link http://elgg.org/
- */
-
-/**
- * Start the Elgg engine
- */
-define('externalpage',true);
-require_once(dirname(__FILE__) . "/engine/start.php");
-
-if (!trigger_plugin_hook('index', 'system', null, FALSE)) {
 	/**
-	 * Check to see if user is logged in, if not display login form
-	 **/
+	 * Elgg Reported content
+	 * 
+	 * @package ElggReportedContent
+	 * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
+	 * @author Curverider Ltd
+	 * @copyright Curverider Ltd 2008-2010
+	 * @link http://elgg.com/
+	 */
 
-	if (isloggedin()) {
-		forward('pg/dashboard/');
-	}
+	require_once(dirname(dirname(dirname(__FILE__))) . "/engine/start.php");
 
-	//Load the front page
-	global $CONFIG;
-	$title = elgg_view_title(elgg_echo('content:latest'));
-	set_context('search');
-	$content = elgg_list_registered_entities(array('limit' => 10, 'full_view' => FALSE, 'allowed_types' => array('object','group')));
-	set_context('main');
-	global $autofeed;
-	$autofeed = FALSE;
-	$content = elgg_view_layout('two_column_left_sidebar', '', $title . $content, elgg_view("account/forms/login"));
-	page_draw(null, $content);
-}
+	admin_gatekeeper();
+	set_context('admin');
+	// Set admin user for user block
+		set_page_owner($_SESSION['guid']);
+
+		
+	$title = elgg_view_title(elgg_echo('reportedcontent'));
+	
+	$reported = elgg_get_entities(array('types' => 'object', 'subtypes' => 'reported_content', 'limit' => 9999));
+	
+	$area2 = elgg_view("reportedcontent/listing", array('entity' => $reported));
+	
+	if(!$reported)  
+	    $reported = elgg_echo("reportedcontent:none");
+		
+// Display main admin menu
+	page_draw(elgg_echo('reportedcontent'),elgg_view_layout("two_column_left_sidebar", '', $title . $area2));
+
+?>
